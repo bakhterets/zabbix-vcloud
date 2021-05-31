@@ -1,0 +1,95 @@
+zabbix_export:
+  version: '5.2'
+  date: '2021-01-13T15:05:15Z'
+  groups:
+    -
+      name: Cloud
+    -
+      name: Templates
+  templates:
+    -
+      template: 'vCloud check'
+      name: 'vCloud check'
+      groups:
+        -
+          name: Cloud
+        -
+          name: Templates
+      applications:
+        -
+          name: vCloud
+      items:
+        -
+          name: vcloud.creationvm
+          key: 'vfs.file.contents["C:\scripts\vcloudcheck\creationlog"]'
+          delay: 5m
+          applications:
+            -
+              name: vCloud
+          valuemap:
+            name: 'vCloud check'
+          triggers:
+            -
+              expression: '{last()}=0'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: '{last()}=1'
+              name: 'Failed to create vm'
+              opdata: 'Current value {ITEM.LASTVALUE1}'
+              priority: HIGH
+              manual_close: 'YES'
+        -
+          name: vcloud.procedure
+          key: 'vfs.file.contents["C:\scripts\vcloudcheck\procedurelog"]'
+          delay: 5m
+          applications:
+            -
+              name: vCloud
+          valuemap:
+            name: 'vCloud check'
+          triggers:
+            -
+              expression: '{last()}=0'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: '{last()}=1'
+              name: 'Procedure of check vcloud has been failed'
+              opdata: 'Current value {ITEM.LASTVALUE1}'
+              priority: HIGH
+              manual_close: 'YES'
+        -
+          name: vcloud.removalvm
+          key: 'vfs.file.contents["C:\scripts\vcloudcheck\removallog"]'
+          delay: 5m
+          applications:
+            -
+              name: vCloud
+          valuemap:
+            name: 'vCloud check'
+          triggers:
+            -
+              expression: '{last()}=0'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: '{last()}=1'
+              name: 'Failed to remove vm'
+              opdata: 'Current value {ITEM.LASTVALUE1}'
+              priority: HIGH
+              manual_close: 'YES'
+      tags:
+        -
+          tag: Service
+          value: cloud
+        -
+          tag: Severity
+          value: important
+  value_maps:
+    -
+      name: 'vCloud check'
+      mappings:
+        -
+          value: '0'
+          newvalue: 'Procedure failed'
+        -
+          value: '1'
+          newvalue: OK
+        -
+          value: '2'
+          newvalue: 'VM doesn''t exist'
